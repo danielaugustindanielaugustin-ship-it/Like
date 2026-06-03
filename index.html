@@ -1,28 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SocialHub</title>
-<link rel="stylesheet" href="style.css">
+    <title>Smart Task Manager</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<nav>
-    <h1>SocialHub</h1>
-</nav>
+    <div class="container">
+        <h1>🚀 Smart Task Manager</h1>
 
-<div class="container">
+        <div class="input-box">
+            <input type="text" id="taskInput" placeholder="Enter a task...">
+            <button onclick="addTask()">Add Task</button>
+        </div>
 
-    <div class="create-post">
-        <textarea id="postText" placeholder="What's on your mind?"></textarea>
-        <button onclick="createPost()">Post</button>
+        <ul id="taskList"></ul>
     </div>
 
-    <div id="feed"></div>
+    <script src="script.js"></script>
 
-</div>
-
-<script src="script.js"></script>
 </body>
 </html>
