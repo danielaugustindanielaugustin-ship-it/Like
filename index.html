@@ -1,1 +1,650 @@
 
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Combined NOVA AI and NovaMind AI creator platform">
+  <title>Combined NOVA AI Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070a14;
+      --surface: rgba(255,255,255,.045);
+      --surface-strong: rgba(10,15,30,.88);
+      --border: rgba(255,255,255,.11);
+      --border-hot: rgba(15,240,192,.32);
+      --text: #e8f0fe;
+      --muted: #7a8ba0;
+      --dim: #3d4f62;
+      --mint: #0ff0c0;
+      --blue: #1a8cff;
+      --violet: #7b5ea7;
+      --rose: #ff4b6e;
+      --amber: #f5a623;
+      --radius: 8px;
+      --sidebar: 248px;
+    }
+
+    [data-theme="light"] {
+      --bg: #f5f8ff;
+      --surface: rgba(10,20,40,.055);
+      --surface-strong: rgba(255,255,255,.9);
+      --border: rgba(25,35,60,.12);
+      --border-hot: rgba(26,140,255,.3);
+      --text: #101827;
+      --muted: #516073;
+      --dim: #8a96a8;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse 70% 55% at 50% -10%, rgba(15,240,192,.14), transparent 62%),
+        radial-gradient(ellipse 42% 45% at 88% 45%, rgba(26,140,255,.11), transparent 58%),
+        radial-gradient(ellipse 40% 42% at 4% 68%, rgba(123,94,167,.12), transparent 58%),
+        var(--bg);
+      font-family: "DM Sans", system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+
+    .particle-field {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .particle {
+      position: absolute;
+      bottom: -20px;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--mint);
+      opacity: 0;
+      animation: floatParticle 10s linear infinite;
+    }
+
+    @keyframes floatParticle {
+      0% { transform: translateY(0) scale(.4); opacity: 0; }
+      12% { opacity: .8; }
+      88% { opacity: .65; }
+      100% { transform: translateY(-110vh) scale(1.6); opacity: 0; }
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: var(--sidebar) minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 20px 12px;
+      background: var(--surface-strong);
+      border-right: 1px solid var(--border);
+      backdrop-filter: blur(24px);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow-y: auto;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 8px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo-mark {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--mint), var(--blue));
+      color: #071018;
+      font-family: "Syne", sans-serif;
+      font-weight: 800;
+      box-shadow: 0 0 24px rgba(15,240,192,.28);
+    }
+
+    .logo-text {
+      font-family: "Syne", sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .model-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      width: fit-content;
+      padding: 5px 10px;
+      border: 1px solid rgba(15,240,192,.22);
+      border-radius: 999px;
+      background: rgba(15,240,192,.09);
+      color: var(--mint);
+      font: 12px "JetBrains Mono", monospace;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--mint);
+      box-shadow: 0 0 16px var(--mint);
+    }
+
+    .nav-group-title {
+      padding: 8px 12px 2px;
+      color: var(--dim);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .nav-btn {
+      width: 100%;
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      background: transparent;
+      color: var(--muted);
+      text-align: left;
+      transition: .2s ease;
+    }
+
+    .nav-btn:hover, .nav-btn.active {
+      color: var(--text);
+      background: rgba(255,255,255,.055);
+      border-color: var(--border);
+    }
+
+    .nav-btn.active {
+      color: var(--mint);
+      border-color: var(--border-hot);
+      background: linear-gradient(135deg, rgba(15,240,192,.12), rgba(26,140,255,.08));
+    }
+
+    .plan-card {
+      margin-top: auto;
+      padding: 14px;
+      border: 1px solid var(--border-hot);
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(15,240,192,.1), rgba(26,140,255,.06));
+    }
+
+    .bar {
+      height: 5px;
+      margin: 10px 0;
+      border-radius: 99px;
+      background: rgba(255,255,255,.09);
+      overflow: hidden;
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      width: 84%;
+      border-radius: inherit;
+      background: linear-gradient(135deg, var(--mint), var(--blue));
+    }
+
+    .main {
+      min-width: 0;
+      padding-top: 64px;
+    }
+
+    .topbar {
+      position: fixed;
+      left: var(--sidebar);
+      right: 0;
+      top: 0;
+      z-index: 5;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 24px;
+      background: var(--surface-strong);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(22px);
+    }
+
+    .menu-btn { display: none; }
+    .top-title {
+      flex: 1;
+      font-family: "Syne", sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .icon-btn, .menu-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+    }
+
+    .page {
+      display: none;
+      padding: 30px;
+      max-width: 1180px;
+      animation: pageIn .3s ease both;
+    }
+
+    .page.active { display: block; }
+    @keyframes pageIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 58px 42px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, rgba(15,240,192,.08), rgba(123,94,167,.08)),
+        var(--surface);
+    }
+
+    h1, h2, h3 { font-family: "Syne", sans-serif; margin: 0; letter-spacing: 0; }
+    h1 { font-size: 58px; line-height: 1.02; max-width: 790px; }
+    h2 { font-size: 30px; margin-bottom: 8px; }
+    h3 { font-size: 18px; }
+    p { color: var(--muted); line-height: 1.65; }
+
+    .gradient-text {
+      background: linear-gradient(135deg, var(--mint), var(--blue), var(--violet));
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+
+    .btn {
+      min-height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 18px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: transparent;
+      text-decoration: none;
+      font-weight: 800;
+    }
+
+    .btn.primary {
+      color: #071018;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--mint), var(--blue));
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      padding: 20px;
+      transition: .22s ease;
+    }
+
+    .card:hover {
+      border-color: var(--border-hot);
+      transform: translateY(-2px);
+    }
+
+    .card-icon { font-size: 28px; margin-bottom: 12px; }
+    .stat { font: 800 30px "Syne", sans-serif; color: var(--text); }
+
+    .tool-layout {
+      display: grid;
+      grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+      margin-top: 20px;
+    }
+
+    textarea, input, select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      background: rgba(255,255,255,.055);
+      outline: none;
+      padding: 12px 14px;
+    }
+
+    textarea { min-height: 130px; resize: vertical; }
+    textarea:focus, input:focus, select:focus {
+      border-color: var(--border-hot);
+      box-shadow: 0 0 0 3px rgba(15,240,192,.08);
+    }
+
+    .chat-box {
+      min-height: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow: auto;
+    }
+
+    .msg {
+      max-width: 82%;
+      padding: 13px 15px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .msg.user {
+      align-self: flex-end;
+      color: #071018;
+      background: linear-gradient(135deg, var(--mint), var(--blue));
+      border-color: transparent;
+    }
+
+    .canvas-wrap {
+      min-height: 420px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(15,240,192,.18), transparent 30%),
+        radial-gradient(circle at 70% 65%, rgba(123,94,167,.22), transparent 30%),
+        #080c16;
+    }
+
+    canvas {
+      width: 100%;
+      max-width: 640px;
+      aspect-ratio: 1;
+      border-radius: var(--radius);
+    }
+
+    .voice-orb {
+      width: 180px;
+      height: 180px;
+      margin: 28px auto;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle, var(--mint), var(--blue));
+      color: #071018;
+      font-size: 46px;
+      box-shadow: 0 0 60px rgba(15,240,192,.35);
+      transition: .25s ease;
+    }
+
+    .voice-orb.listening {
+      transform: scale(1.06);
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 40px rgba(15,240,192,.28); }
+      50% { box-shadow: 0 0 90px rgba(15,240,192,.65); }
+    }
+
+    .price {
+      font: 800 42px "Syne", sans-serif;
+      margin: 10px 0;
+    }
+
+    .settings-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toggle {
+      width: 46px;
+      height: 26px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.13);
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .toggle.on { background: linear-gradient(135deg, var(--mint), var(--blue)); }
+    .toggle::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: white;
+      transition: .2s ease;
+    }
+    .toggle.on::after { left: 23px; }
+
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 10;
+      max-width: 320px;
+      padding: 14px 16px;
+      border: 1px solid var(--border-hot);
+      border-radius: var(--radius);
+      background: var(--surface-strong);
+      box-shadow: 0 18px 60px rgba(0,0,0,.35);
+      display: none;
+    }
+
+    .toast.show { display: block; }
+
+    @media (max-width: 860px) {
+      :root { --sidebar: 0px; }
+      .app { grid-template-columns: 1fr; }
+      .sidebar {
+        position: fixed;
+        z-index: 8;
+        width: 248px;
+        transform: translateX(-100%);
+        transition: .25s ease;
+      }
+      .sidebar.open { transform: translateX(0); }
+      .topbar { left: 0; }
+      .menu-btn { display: inline-grid; place-items: center; }
+      .page { padding: 18px; }
+      h1 { font-size: 38px; }
+      .hero { padding: 34px 22px; }
+      .tool-layout { grid-template-columns: 1fr; }
+      .msg { max-width: 95%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="particle-field" id="particles"></div>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="logo">
+        <div class="logo-mark">N</div>
+        <div>
+          <div class="logo-text">NOVA<span class="gradient-text">Mind</span></div>
+          <div class="model-tag"><span class="dot"></span>Nova-4 Ultra</div>
+        </div>
+      </div>
+
+      <div class="nav-group-title">Navigation</div>
+      <button class="nav-btn active" data-page="home">Home</button>
+      <button class="nav-btn" data-page="chat">AI Chat</button>
+      <button class="nav-btn" data-page="image">Image Generator</button>
+      <button class="nav-btn" data-page="voice">Voice AI</button>
+      <button class="nav-btn" data-page="dashboard">Dashboard</button>
+
+      <div class="nav-group-title">Account</div>
+      <button class="nav-btn" data-page="pricing">Pricing</button>
+      <button class="nav-btn" data-page="profile">Profile</button>
+      <button class="nav-btn" data-page="settings">Settings</button>
+      <button class="nav-btn" data-page="login">Login</button>
+      <button class="nav-btn" data-page="contact">Contact</button>
+
+      <div class="plan-card">
+        <strong>Pro Plan</strong>
+        <p style="margin:5px 0 0;font-size:13px">847 / 1,000 requests used</p>
+        <div class="bar"><span></span></div>
+        <button class="btn primary" style="width:100%" data-jump="pricing">Upgrade</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="menu-btn" id="menuBtn">Menu</button>
+        <div class="top-title" id="topTitle">Home</div>
+        <button class="icon-btn" id="themeBtn" title="Toggle theme">Theme</button>
+      </header>
+
+      <section class="page active" id="home">
+        <div class="hero">
+          <div class="model-tag"><span class="dot"></span>Combined NOVA AI + NovaMind AI</div>
+          <h1>The Future of <span class="gradient-text">Intelligence</span> is Here</h1>
+          <p style="max-width:680px;font-size:17px">
+            One combined program with instant answers, local image creation, voice assistant, dashboard, pricing, profile, settings, login, and contact screens.
+          </p>
+          <div class="actions">
+            <button class="btn primary" data-jump="chat">Start Chat</button>
+            <button class="btn" data-jump="image">Create Image</button>
+            <button class="btn" data-jump="voice">Try Voice</button>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="card"><div class="card-icon">AI</div><h3>AI Chat</h3><p>Fast answer drafts, coding help, summaries, and translation.</p></div>
+          <div class="card"><div class="card-icon">IMG</div><h3>Image Generator</h3><p>Canvas-based visual generation with style controls and PNG download.</p></div>
+          <div class="card"><div class="card-icon">MIC</div><h3>Voice AI</h3><p>Speech recognition and text-to-speech where browser support exists.</p></div>
+          <div class="card"><div class="card-icon">SEC</div><h3>Dashboard</h3><p>Usage cards, activity, model status, and account overview.</p></div>
+        </div>
+      </section>
+
+      <section class="page" id="chat">
+        <h2>AI Chat</h2>
+        <p>Local demo chat. Replace <code>makeAnswer()</code> with your API backend for real AI.</p>
+        <div class="tool-layout">
+          <div class="card">
+            <textarea id="chatInput" placeholder="Ask NOVA AI anything..."></textarea>
+            <div class="actions"><button class="btn primary" id="sendChat">Send</button><button class="btn" id="clearChat">Clear</button></div>
+          </div>
+          <div class="card chat-box" id="chatBox">
+            <div class="msg">Welcome. Ask for ideas, code, image prompts, business plans, or Tamil/English translations.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="image">
+        <h2>Image Generator</h2>
+        <p>Create a downloadable local AI-style image from text.</p>
+        <div class="tool-layout">
+          <div class="card">
+            <textarea id="imagePrompt" placeholder="Example: futuristic Chennai AI city at sunrise"></textarea>
+            <select id="imageStyle" style="margin-top:12px">
+              <option value="cinematic">Cinematic</option>
+              <option value="anime">Anime</option>
+              <option value="product">Product Render</option>
+              <option value="editorial">Editorial</option>
+            </select>
+            <div class="actions"><button class="btn primary" id="makeImage">Generate</button><button class="btn" id="downloadImage">Download PNG</button></div>
+          </div>
+          <div class="card canvas-wrap"><canvas id="imageCanvas" width="720" height="720"></canvas></div>
+        </div>
+      </section>
+
+      <section class="page" id="voice">
+        <h2>Voice AI</h2>
+        <p>Use browser speech recognition and speech output when available.</p>
+        <div class="card" style="text-align:center">
+          <div class="voice-orb" id="voiceOrb">AI</div>
+          <p id="voiceStatus">Click listen, speak, then ask NOVA to answer.</p>
+          <div class="actions" style="justify-content:center">
+            <button class="btn primary" id="listenBtn">Listen</button>
+            <button class="btn" id="speakBtn">Speak Answer</button>
+          </div>
+          <div class="card" style="text-align:left;margin-top:18px">
+            <strong>Transcript</strong>
+            <p id="transcript">No voice captured yet.</p>
+            <strong>Answer</strong>
+            <p id="voiceAnswer">No answer yet.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="dashboard">
+        <h2>Dashboard</h2>
+        <div class="grid">
+          <div class="card"><div class="stat">2.4M+</div><p>Active users</p></div>
+          <div class="card"><div class="stat">180M+</div><p>AI requests daily</p></div>
+          <div class="card"><div class="stat">99.99%</div><p>Uptime</p></div>
+          <div class="card"><div class="stat">100+</div><p>Languages</p></div>
+        </div>
+        <div class="card" style="margin-top:18px">
+          <h3>AI Suggestion</h3>
+          <p id="dashboardTip">Your image and chat usage is high. Add prompt templates and saved projects next.</p>
+          <button class="btn primary" id="newTip">Generate Tip</button>
+        </div>
+      </section>
+
+      <section class="page" id="pricing">
+        <h2>Pricing</h2>
+        <div class="grid">
+          <div class="card"><h3>Free</h3><div class="price">$0</div><p>Basic chat and limited images.</p><button class="btn">Current</button></div>
+          <div class="card"><h3>Pro</h3><div class="price">$19</div><p>More generation, voice tools, saved history.</p><button class="btn primary">Choose Pro</button></div>
+          <div class="card"><h3>Ultra</h3><div class="price">$49</div><p>Best models, teams, analytics, priority generation.</p><button class="btn primary">Choose Ultra</button></div>
+        </div>
+      </section>
+
+      <section class="page" id="profile">
+        <h2>Profile</h2>
+        <div class="card">
+          <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+            <div class="logo-mark" style="width:78px;height:78px;font-size:28px">U</div>
+            <div><h3>User Creator</h3><p>@nova-user | Pro Plan | AI enthusiast and developer</p></div>
+          </div>
+        </div>
+        <div class="grid">
