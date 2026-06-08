@@ -1,11 +1,10 @@
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Combined NOVA AI and NovaMind AI creator platform">
-  <title>Combined NOVA AI Studio</title>
+  <title>Combined NOVA AI Studio - Full Stack</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <style>
@@ -481,6 +480,28 @@
 
     .toast.show { display: block; }
 
+    .backend-status {
+      position: fixed;
+      right: 24px;
+      top: 80px;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      background: var(--surface-strong);
+      border: 1px solid var(--border);
+      font-size: 13px;
+      z-index: 100;
+    }
+
+    .backend-status.connected {
+      border-color: var(--mint);
+      color: var(--mint);
+    }
+
+    .backend-status.disconnected {
+      border-color: var(--rose);
+      color: var(--rose);
+    }
+
     @media (max-width: 860px) {
       :root { --sidebar: 0px; }
       .app { grid-template-columns: 1fr; }
@@ -504,6 +525,11 @@
 </head>
 <body>
   <div class="particle-field" id="particles"></div>
+  
+  <div class="backend-status disconnected" id="backendStatus">
+    Backend: Running in Browser Mode
+  </div>
+
   <div class="app">
     <aside class="sidebar" id="sidebar">
       <div class="logo">
@@ -548,8 +574,11 @@
           <div class="model-tag"><span class="dot"></span>Combined NOVA AI + NovaMind AI</div>
           <h1>The Future of <span class="gradient-text">Intelligence</span> is Here</h1>
           <p style="max-width:680px;font-size:17px">
-            One combined program with instant answers, local image creation, voice assistant, dashboard, pricing, profile, settings, login, and contact screens.
+            One combined program with instant answers, local image creation, voice assistant, dashboard, pricing, profile, settings, login, and contact screens. Backend included!
           </p>
+          <div style="margin: 16px 0; padding: 12px; background: rgba(15,240,192,0.1); border: 1px solid var(--border-hot); border-radius: var(--radius);">
+            <strong style="color: var(--mint);">🚀 Full Stack Mode:</strong> This single file includes both frontend UI and backend API logic running in browser using JavaScript Objects
+          </div>
           <div class="actions">
             <button class="btn primary" data-jump="chat">Start Chat</button>
             <button class="btn" data-jump="image">Create Image</button>
@@ -566,7 +595,7 @@
 
       <section class="page" id="chat">
         <h2>AI Chat</h2>
-        <p>Local demo chat. Replace <code>makeAnswer()</code> with your API backend for real AI.</p>
+        <p>Local demo chat with backend simulation. API calls handled via JavaScript Objects.</p>
         <div class="tool-layout">
           <div class="card">
             <textarea id="chatInput" placeholder="Ask NOVA AI anything..."></textarea>
@@ -580,7 +609,7 @@
 
       <section class="page" id="image">
         <h2>Image Generator</h2>
-        <p>Create a downloadable local AI-style image from text.</p>
+        <p>Create a downloadable local AI-style image from text with backend simulation.</p>
         <div class="tool-layout">
           <div class="card">
             <textarea id="imagePrompt" placeholder="Example: futuristic Chennai AI city at sunrise"></textarea>
@@ -618,10 +647,14 @@
       <section class="page" id="dashboard">
         <h2>Dashboard</h2>
         <div class="grid">
-          <div class="card"><div class="stat">2.4M+</div><p>Active users</p></div>
-          <div class="card"><div class="stat">180M+</div><p>AI requests daily</p></div>
+          <div class="card"><div class="stat" id="statUsers">2.4M+</div><p>Active users</p></div>
+          <div class="card"><div class="stat" id="statRequests">180M+</div><p>AI requests daily</p></div>
           <div class="card"><div class="stat">99.99%</div><p>Uptime</p></div>
           <div class="card"><div class="stat">100+</div><p>Languages</p></div>
+        </div>
+        <div class="card" style="margin-top:18px">
+          <h3>Your Usage</h3>
+          <p id="userUsage">Chat: 0 | Images: 0 | Voice: 0 | Total: 0</p>
         </div>
         <div class="card" style="margin-top:18px">
           <h3>AI Suggestion</h3>
@@ -643,8 +676,723 @@
         <h2>Profile</h2>
         <div class="card">
           <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
-            <div class="logo-mark" style="width:78px;height:78px;font-size:28px">U</div>
-            <div><h3>User Creator</h3><p>@nova-user | Pro Plan | AI enthusiast and developer</p></div>
+            <div class="logo-mark" style="width:78px;height:78px;font-size:28px" id="profileAvatar">U</div>
+            <div><h3 id="profileName">User Creator</h3><p id="profileDesc">@nova-user | Pro Plan | AI enthusiast and developer</p></div>
           </div>
         </div>
         <div class="grid">
+          <div class="card"><div class="stat" id="profileMessages">1,247</div><p>Total messages</p></div>
+          <div class="card"><div class="stat" id="profileImages">89</div><p>Images created</p></div>
+          <div class="card"><div class="stat" id="profileDays">142</div><p>Days active</p></div>
+        </div>
+      </section>
+
+      <section class="page" id="settings">
+        <h2>Settings</h2>
+        <div class="card">
+          <div class="settings-row"><div><strong>Streaming Responses</strong><p>Show answers while generating.</p></div><div class="toggle on"></div></div>
+          <div class="settings-row"><div><strong>AI Memory</strong><p>Remember context between sessions.</p></div><div class="toggle on"></div></div>
+          <div class="settings-row"><div><strong>Tamil Mode</strong><p>Enhanced Tamil language support.</p></div><div class="toggle" id="tamilToggle"></div></div>
+          <div class="settings-row"><div><strong>Notifications</strong><p>Notify about responses and updates.</p></div><div class="toggle on"></div></div>
+        </div>
+      </section>
+
+      <section class="page" id="login">
+        <h2>Login / Register</h2>
+        <div class="card" style="max-width:430px">
+          <input id="nameInput" placeholder="Name" style="margin-bottom:12px">
+          <input id="emailInput" type="email" placeholder="Email" style="margin-bottom:12px">
+          <input id="passwordInput" type="password" placeholder="Password" style="margin-bottom:12px">
+          <button class="btn primary" style="width:100%" id="loginBtn">Continue</button>
+          <p id="loginMsg"></p>
+        </div>
+      </section>
+
+      <section class="page" id="contact">
+        <h2>Contact</h2>
+        <div class="tool-layout">
+          <div class="card">
+            <h3>Contact Info</h3>
+            <p>Email: hello@novamind.ai</p>
+            <p>Support: 24/7 for Pro+</p>
+            <p>Enterprise: response within 4 business hours.</p>
+          </div>
+          <div class="card">
+            <input id="contactName" placeholder="Your name" style="margin-bottom:12px">
+            <input id="contactEmail" placeholder="Email address" style="margin-bottom:12px">
+            <textarea id="contactMsg" placeholder="Your message"></textarea>
+            <div class="actions"><button class="btn" id="draftMsg">AI Draft</button><button class="btn primary" id="sendMsg">Send</button></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ==================== BACKEND SIMULATION IN BROWSER ====================
+    // This simulates a Node.js backend using JavaScript Objects
+    
+    const Backend = {
+      // In-memory database
+      users: [],
+      chatHistory: [],
+      imageHistory: [],
+      userUsage: new Map(),
+      currentUser: null,
+      
+      // Authentication
+      async register(name, email, password) {
+        const existing = this.users.find(u => u.email === email);
+        if (existing) {
+          throw new Error('Email already registered');
+        }
+        
+        const user = {
+          id: Date.now().toString(),
+          name,
+          email,
+          password: btoa(password),
+          plan: 'free',
+          createdAt: new Date().toISOString()
+        };
+        
+        this.users.push(user);
+        this.userUsage.set(`${user.id}:chat`, 0);
+        this.userUsage.set(`${user.id}:image`, 0);
+        this.userUsage.set(`${user.id}:voice`, 0);
+        
+        const token = `token-${user.id}-${Date.now()}`;
+        return { token, user: { id: user.id, name: user.name, email: user.email, plan: user.plan } };
+      },
+      
+      async login(email, password) {
+        const user = this.users.find(u => u.email === email && u.password === btoa(password));
+        if (!user) {
+          throw new Error('Invalid credentials');
+        }
+        
+        const token = `token-${user.id}-${Date.now()}`;
+        return { token, user: { id: user.id, name: user.name, email: user.email, plan: user.plan } };
+      },
+      
+      async authenticate(token) {
+        if (!token || !token.startsWith('token-')) {
+          throw new Error('Invalid token');
+        }
+        
+        const userId = token.split('-')[1];
+        const user = this.users.find(u => u.id === userId);
+        if (!user) {
+          throw new Error('User not found');
+        }
+        
+        this.currentUser = user;
+        return user;
+      },
+      
+      // Chat API
+      async chat(prompt, history = []) {
+        if (!this.currentUser) {
+          throw new Error('Authentication required');
+        }
+        
+        this.updateUsage(this.currentUser.id, 'chat');
+        const usage = this.getUsage(this.currentUser.id);
+        
+        const planLimits = { free: 100, pro: 1000, ultra: 10000 };
+        if (usage.total >= planLimits[this.currentUser.plan]) {
+          throw new Error('Usage limit reached. Upgrade your plan.');
+        }
+        
+        const answer = this.generateAnswer(prompt);
+        
+        const chatEntry = {
+          id: Date.now().toString(),
+          userId: this.currentUser.id,
+          prompt,
+          answer,
+          timestamp: new Date().toISOString()
+        };
+        this.chatHistory.push(chatEntry);
+        
+        return { answer, usage, chatId: chatEntry.id };
+      },
+      
+      async getChatHistory(limit = 50) {
+        if (!this.currentUser) {
+          throw new Error('Authentication required');
+        }
+        
+        const userHistory = this.chatHistory
+          .filter(c => c.userId === this.currentUser.id)
+          .slice(-limit)
+          .reverse();
+        
+        return { history: userHistory };
+      },
+      
+      // Image API
+      async generateImage(prompt, style = 'cinematic') {
+        if (!this.currentUser) {
+          throw new Error('Authentication required');
+        }
+        
+        this.updateUsage(this.currentUser.id, 'image');
+        const usage = this.getUsage(this.currentUser.id);
+        
+        const planLimits = { free: 10, pro: 100, ultra: 1000 };
+        if (usage.image >= planLimits[this.currentUser.plan]) {
+          throw new Error('Image generation limit reached. Upgrade your plan.');
+        }
+        
+        const imageData = this.generateFallbackImage(prompt, style);
+        
+        const imageEntry = {
+          id: Date.now().toString(),
+          userId: this.currentUser.id,
+          prompt,
+          style,
+          imageData,
+          timestamp: new Date().toISOString()
+        };
+        this.imageHistory.push(imageEntry);
+        
+        return { imageUrl: `data:image/png;base64,${imageData}`, usage, imageId: imageEntry.id };
+      },
+      
+      async getImageHistory(limit = 20) {
+        if (!this.currentUser) {
+          throw new Error('Authentication required');
+        }
+        
+        const userHistory = this.imageHistory
+          .filter(i => i.userId === this.currentUser.id)
+          .slice(-limit)
+          .reverse();
+        
+        return { history: userHistory };
+      },
+      
+      // Voice API
+      async transcribe(audioData) {
+        if (!this.currentUser) {
+          throw new Error('Authentication required');
+        }
+        
+        this.updateUsage(this.currentUser.id, 'voice');
+        const usage = this.getUsage(this.currentUser.id);
+        
+        return { message: 'Client-side speech recognition recommended', usage };
+      },
+      
+      async synthesize(text) {
+        if (!this.currentUser) {
+          throw new Error('Authentication required');
+        }
+        
+        this.updateUsage(this.currentUser.id, 'voice');
+        const usage = this.getUsage(this.currentUser.id);
+        
+        return { message: 'Client-side speech synthesis recommended', usage };
+      },
+      
+      // Dashboard API
+      async getStats() {
+        if (!this.currentUser) {
+          throw new Error('Authentication required');
+        }
+        
+        const usage = this.getUsage(this.currentUser.id);
+        const userHistory = this.chatHistory.filter(c => c.userId === this.currentUser.id);
+        const imageUserHistory = this.imageHistory.filter(i => i.userId === this.currentUser.id);
+        
+        return {
+          usage,
+          plan: this.currentUser.plan,
+          totalMessages: userHistory.length,
+          totalImages: imageUserHistory.length,
+          accountAge: Math.floor((Date.now() - new Date(this.currentUser.createdAt).getTime()) / (1000 * 60 * 60 * 24))
+        };
+      },
+      
+      async getTip() {
+        const tips = [
+          'Add project folders so users can save related chats, images, and voice notes together.',
+          'Create prompt presets for business, coding, Tamil translation, image design, and student study workflows.',
+          'Add usage limits, export history, and a backend API proxy before production release.',
+          'Turn image prompts into video storyboards for a future video generation feature.',
+          'Implement saved prompts and templates for recurring tasks.',
+          'Add collaboration features for team usage on Ultra plan.'
+        ];
+        
+        return { tip: tips[Math.floor(Math.random() * tips.length)] };
+      },
+      
+      // Pricing API
+      async getPricing() {
+        const plans = [
+          { name: 'Free', price: 0, features: ['Basic chat', '10 images/month', 'Voice demo', '7-day history'] },
+          { name: 'Pro', price: 19, features: ['Advanced chat', '100 images/month', 'Full voice tools', 'Unlimited history', 'Priority support'] },
+          { name: 'Ultra', price: 49, features: ['Best models', '1000 images/month', 'Team collaboration', 'Analytics', 'API access', '24/7 support'] }
+        ];
+        
+        return { plans };
+      },
+      
+      async upgrade(plan) {
+        if (!this.currentUser) {
+          throw new Error('Authentication required');
+        }
+        
+        if (!['pro', 'ultra'].includes(plan)) {
+          throw new Error('Invalid plan');
+        }
+        
+        this.currentUser.plan = plan;
+        return { message: `Upgraded to ${plan} plan`, plan };
+      },
+      
+      // Contact API
+      async submitContact(name, email, message) {
+        if (!name || !email || !message) {
+          throw new Error('Name, email, and message required');
+        }
+        
+        console.log('Contact form submission:', { name, email, message });
+        return { message: 'Message sent successfully. We\'ll respond within 24 hours.' };
+      },
+      
+      // Helper functions
+      updateUsage(userId, type = 'chat') {
+        const key = `${userId}:${type}`;
+        const current = this.userUsage.get(key) || 0;
+        this.userUsage.set(key, current + 1);
+      },
+      
+      getUsage(userId) {
+        const chatKey = `${userId}:chat`;
+        const imageKey = `${userId}:image`;
+        const voiceKey = `${userId}:voice`;
+        
+        return {
+          chat: this.userUsage.get(chatKey) || 0,
+          image: this.userUsage.get(imageKey) || 0,
+          voice: this.userUsage.get(voiceKey) || 0,
+          total: (this.userUsage.get(chatKey) || 0) + (this.userUsage.get(imageKey) || 0) + (this.userUsage.get(voiceKey) || 0)
+        };
+      },
+      
+      generateAnswer(prompt) {
+        const clean = prompt.trim();
+        if (!clean) return "Ask a question first.";
+        
+        return [
+          "NOVA answer:",
+          "",
+          "Main idea: " + clean,
+          "Recommended action: break it into a goal, inputs, output format, and deadline.",
+          "Backend running in browser mode (JavaScript Objects).",
+          "Extra feature idea: save this prompt into project history and allow image or voice generation from the same prompt."
+        ].join('\n');
+      },
+      
+      generateFallbackImage(prompt, style) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 720;
+        canvas.height = 720;
+        const ctx = canvas.getContext('2d');
+        
+        const colors = {
+          cinematic: ['#071018', '#0ff0c0', '#f5a623'],
+          anime: ['#171033', '#ff4b6e', '#1a8cff'],
+          product: ['#101827', '#e8f0fe', '#0ff0c0'],
+          editorial: ['#21151c', '#f5a623', '#7b5ea7']
+        }[style] || ['#071018', '#0ff0c0', '#1a8cff'];
+        
+        const gradient = ctx.createLinearGradient(0, 0, 720, 720);
+        gradient.addColorStop(0, colors[0]);
+        gradient.addColorStop(0.52, colors[1]);
+        gradient.addColorStop(1, colors[2]);
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 720, 720);
+        
+        for (let i = 0; i < 38; i++) {
+          ctx.fillStyle = `rgba(255,255,255,0.18)`;
+          ctx.beginPath();
+          ctx.arc(Math.random() * 720, Math.random() * 720, 28 + Math.random() * 120, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        
+        ctx.fillStyle = 'rgba(0,0,0,0.42)';
+        ctx.fillRect(0, 480, 720, 220);
+        ctx.fillStyle = '#e8f0fe';
+        ctx.font = '800 30px Syne, sans-serif';
+        ctx.fillText('NOVA AI IMAGE', 42, 545);
+        ctx.font = '20px DM Sans, sans-serif';
+        
+        const words = prompt.split(/\s+/);
+        let line = '';
+        let y = 585;
+        words.forEach(word => {
+          const test = line + word + ' ';
+          if (test.length > 40 && line) {
+            ctx.fillText(line, 42, y);
+            line = word + ' ';
+            y += 28;
+          } else {
+            line = test;
+          }
+        });
+        ctx.fillText(line, 42, y);
+        
+        return canvas.toDataURL('image/png').split(',')[1];
+      }
+    };
+
+    // ==================== FRONTEND LOGIC ====================
+    
+    const pages = document.querySelectorAll(".page");
+    const navButtons = document.querySelectorAll(".nav-btn");
+    const title = document.getElementById("topTitle");
+    const sidebar = document.getElementById("sidebar");
+    const canvas = document.getElementById("imageCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const pageNames = {
+      home: "Home",
+      chat: "AI Chat",
+      image: "Image Generator",
+      voice: "Voice AI",
+      dashboard: "Dashboard",
+      pricing: "Pricing",
+      profile: "Profile",
+      settings: "Settings",
+      login: "Login",
+      contact: "Contact"
+    };
+
+    function showPage(id) {
+      pages.forEach(page => page.classList.toggle("active", page.id === id));
+      navButtons.forEach(btn => btn.classList.toggle("active", btn.dataset.page === id));
+      title.textContent = pageNames[id] || "NOVA AI";
+      sidebar.classList.remove("open");
+      
+      if (id === 'dashboard') updateDashboard();
+      if (id === 'profile') updateProfile();
+    }
+
+    navButtons.forEach(btn => btn.addEventListener("click", () => showPage(btn.dataset.page)));
+    document.querySelectorAll("[data-jump]").forEach(btn => btn.addEventListener("click", () => showPage(btn.dataset.jump)));
+    document.getElementById("menuBtn").addEventListener("click", () => sidebar.classList.toggle("open"));
+    document.getElementById("themeBtn").addEventListener("click", () => {
+      document.documentElement.dataset.theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    });
+
+    document.querySelectorAll(".toggle").forEach(toggle => {
+      toggle.addEventListener("click", () => toggle.classList.toggle("on"));
+    });
+
+    function toast(message) {
+      const box = document.getElementById("toast");
+      box.textContent = message;
+      box.classList.add("show");
+      setTimeout(() => box.classList.remove("show"), 2200);
+    }
+
+    // ==================== CHAT WITH BACKEND ====================
+    
+    document.getElementById("sendChat").addEventListener("click", async () => {
+      const input = document.getElementById("chatInput");
+      const box = document.getElementById("chatBox");
+      const prompt = input.value.trim();
+      
+      if (!prompt) return toast("Type a chat prompt first.");
+      
+      box.insertAdjacentHTML("beforeend", `<div class="msg user">${escapeHtml(prompt)}</div>`);
+      
+      try {
+        const response = await Backend.chat(prompt);
+        box.insertAdjacentHTML("beforeend", `<div class="msg">${escapeHtml(response.answer).replace(/\n/g, "<br>")}</div>`);
+        input.value = "";
+        box.scrollTop = box.scrollHeight;
+        updateDashboard();
+      } catch (error) {
+        box.insertAdjacentHTML("beforeend", `<div class="msg">Error: ${error.message}</div>`);
+      }
+    });
+
+    document.getElementById("clearChat").addEventListener("click", () => {
+      document.getElementById("chatBox").innerHTML = '<div class="msg">Chat cleared. Ask NOVA AI anything.</div>';
+    });
+
+    // ==================== IMAGE WITH BACKEND ====================
+    
+    function palette(style) {
+      return {
+        cinematic: ["#071018", "#0ff0c0", "#f5a623"],
+        anime: ["#171033", "#ff4b6e", "#1a8cff"],
+        product: ["#101827", "#e8f0fe", "#0ff0c0"],
+        editorial: ["#21151c", "#f5a623", "#7b5ea7"]
+      }[style] || ["#071018", "#0ff0c0", "#1a8cff"];
+    }
+
+    function hash(text) {
+      let h = 2166136261;
+      for (let i = 0; i < text.length; i++) {
+        h ^= text.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return h >>> 0;
+    }
+
+    function rnd(seed) {
+      const x = Math.sin(seed) * 10000;
+      return x - Math.floor(x);
+    }
+
+    function drawImage() {
+      const prompt = document.getElementById("imagePrompt").value.trim() || "future AI creative studio";
+      const style = document.getElementById("imageStyle").value;
+      const colors = palette(style);
+      const seed = hash(prompt + style);
+      const g = ctx.createLinearGradient(0, 0, 720, 720);
+      g.addColorStop(0, colors[0]);
+      g.addColorStop(.52, colors[1]);
+      g.addColorStop(1, colors[2]);
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 720, 720);
+
+      for (let i = 0; i < 38; i++) {
+        ctx.fillStyle = toRgba(colors[i % colors.length], .18);
+        ctx.beginPath();
+        ctx.arc(rnd(seed + i) * 720, rnd(seed + i * 8) * 720, 28 + rnd(seed + i * 13) * 120, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = "rgba(0,0,0,.42)";
+      ctx.fillRect(0, 480, 720, 220);
+      ctx.fillStyle = "#e8f0fe";
+      ctx.font = "800 30px Syne, sans-serif";
+      ctx.fillText("NOVA AI IMAGE", 42, 545);
+      ctx.font = "20px DM Sans, sans-serif";
+      wrapText(ctx, prompt, 42, 585, 620, 28);
+    }
+
+    function toRgba(hex, alpha) {
+      const n = parseInt(hex.replace("#", ""), 16);
+      return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+    }
+
+    function wrapText(context, text, x, y, maxWidth, lineHeight) {
+      const words = text.split(/\s+/);
+      let line = "";
+      words.forEach(word => {
+        const test = line + word + " ";
+        if (context.measureText(test).width > maxWidth && line) {
+          context.fillText(line, x, y);
+          line = word + " ";
+          y += lineHeight;
+        } else {
+          line = test;
+        }
+      });
+      context.fillText(line, x, y);
+    }
+
+    document.getElementById("makeImage").addEventListener("click", async () => {
+      const prompt = document.getElementById("imagePrompt").value.trim();
+      if (!prompt) return toast("Enter an image prompt first.");
+      
+      const style = document.getElementById("imageStyle").value;
+      
+      try {
+        drawImage(); // Local preview
+        const response = await Backend.generateImage(prompt, style);
+        toast("Image generated successfully!");
+        updateDashboard();
+      } catch (error) {
+        toast(`Error: ${error.message}`);
+      }
+    });
+
+    document.getElementById("downloadImage").addEventListener("click", () => {
+      const link = document.createElement("a");
+      link.download = "combined-nova-ai-image.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    });
+
+    // ==================== DASHBOARD ====================
+    
+    async function updateDashboard() {
+      try {
+        const stats = await Backend.getStats();
+        document.getElementById("userUsage").textContent = 
+          `Chat: ${stats.usage.chat} | Images: ${stats.usage.image} | Voice: ${stats.usage.voice} | Total: ${stats.usage.total}`;
+      } catch (error) {
+        console.log('Dashboard update:', error.message);
+      }
+    }
+
+    document.getElementById("newTip").addEventListener("click", async () => {
+      try {
+        const { tip } = await Backend.getTip();
+        document.getElementById("dashboardTip").textContent = tip;
+      } catch (error) {
+        document.getElementById("dashboardTip").textContent = "Add project folders for better organization.";
+      }
+    });
+
+    // ==================== PROFILE ====================
+    
+    async function updateProfile() {
+      if (!Backend.currentUser) {
+        document.getElementById("profileName").textContent = "Not Logged In";
+        document.getElementById("profileDesc").textContent = "Please login to view your profile";
+        return;
+      }
+      
+      document.getElementById("profileName").textContent = Backend.currentUser.name;
+      document.getElementById("profileDesc").textContent = 
+        `@${Backend.currentUser.email.split('@')[0]} | ${Backend.currentUser.plan} Plan | AI enthusiast and developer`;
+      document.getElementById("profileAvatar").textContent = Backend.currentUser.name.charAt(0);
+      
+      try {
+        const stats = await Backend.getStats();
+        document.getElementById("profileMessages").textContent = stats.totalMessages;
+        document.getElementById("profileImages").textContent = stats.totalImages;
+        document.getElementById("profileDays").textContent = stats.accountAge;
+      } catch (error) {
+        console.log('Profile update:', error.message);
+      }
+    }
+
+    // ==================== LOGIN/REGISTER ====================
+    
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+      const name = document.getElementById("nameInput").value.trim();
+      const email = document.getElementById("emailInput").value.trim();
+      const password = document.getElementById("passwordInput").value;
+      
+      if (!email || !password) {
+        document.getElementById("loginMsg").textContent = "Enter email and password first.";
+        return;
+      }
+      
+      try {
+        let result;
+        if (name) {
+          result = await Backend.register(name, email, password);
+          document.getElementById("loginMsg").textContent = `Account created! Welcome, ${name}`;
+        } else {
+          result = await Backend.login(email, password);
+          document.getElementById("loginMsg").textContent = `Login successful! Welcome, ${result.user.name}`;
+        }
+        
+        Backend.currentUser = result.user;
+        updateDashboard();
+        updateProfile();
+      } catch (error) {
+        document.getElementById("loginMsg").textContent = error.message;
+      }
+    });
+
+    // ==================== CONTACT ====================
+    
+    document.getElementById("draftMsg").addEventListener("click", () => {
+      document.getElementById("contactMsg").value = "Hello NOVA AI team, I would like help with setting up the combined AI chat, image, and voice platform. Please share the next steps for connecting real AI APIs and deployment.";
+    });
+
+    document.getElementById("sendMsg").addEventListener("click", async () => {
+      const name = document.getElementById("contactName").value.trim();
+      const email = document.getElementById("contactEmail").value.trim();
+      const message = document.getElementById("contactMsg").value.trim();
+      
+      try {
+        await Backend.submitContact(name, email, message);
+        toast("Demo message sent.");
+      } catch (error) {
+        toast(`Error: ${error.message}`);
+      }
+    });
+
+    // ==================== VOICE AI ====================
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let lastVoiceAnswer = "";
+    document.getElementById("listenBtn").addEventListener("click", async () => {
+      if (!SpeechRecognition) return toast("Speech recognition is not supported in this browser.");
+      
+      const recognition = new SpeechRecognition();
+      recognition.lang = "en-US";
+      recognition.onstart = () => {
+        document.getElementById("voiceOrb").classList.add("listening");
+        document.getElementById("voiceStatus").textContent = "Listening...";
+      };
+      recognition.onresult = event => {
+        const text = event.results[0][0].transcript;
+        document.getElementById("transcript").textContent = text;
+        
+        try {
+          const response = await Backend.chat(text);
+          lastVoiceAnswer = response.answer;
+          document.getElementById("voiceAnswer").textContent = response.answer;
+          updateDashboard();
+        } catch (error) {
+          document.getElementById("voiceAnswer").textContent = `Error: ${error.message}`;
+        }
+      };
+      recognition.onend = () => {
+        document.getElementById("voiceOrb").classList.remove("listening");
+        document.getElementById("voiceStatus").textContent = "Voice capture finished.";
+      };
+      recognition.start();
+    });
+
+    document.getElementById("speakBtn").addEventListener("click", () => {
+      const text = lastVoiceAnswer || document.getElementById("voiceAnswer").textContent;
+      if (!("speechSynthesis" in window)) return toast("Speech synthesis is not supported.");
+      speechSynthesis.cancel();
+      speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+    });
+
+    // ==================== HELPER FUNCTIONS ====================
+    
+    function escapeHtml(value) {
+      return value.replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+
+    function makeParticles() {
+      const field = document.getElementById("particles");
+      for (let i = 0; i < 34; i++) {
+        const p = document.createElement("span");
+        p.className = "particle";
+        p.style.left = Math.random() * 100 + "%";
+        p.style.animationDelay = Math.random() * 9 + "s";
+        p.style.animationDuration = 7 + Math.random() * 8 + "s";
+        p.style.background = i % 3 === 0 ? "var(--mint)" : i % 3 === 1 ? "var(--blue)" : "var(--violet)";
+        field.appendChild(p);
+      }
+    }
+
+    // ==================== INITIALIZATION ====================
+    
+    makeParticles();
+    drawImage();
+    
+    // Update backend status
+    const backendStatus = document.getElementById("backendStatus");
+    backendStatus.textContent = "Backend: Running in Browser Mode (JavaScript Objects)";
+    backendStatus.classList.add("connected");
+  </script>
+</body>
+</html>
