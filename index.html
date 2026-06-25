@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot Example</title>
+  <style>
+    /* Add some basic styles to the chat window */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+    }
+
+    #chat-window {
+      max-width: 600px;
+      margin: 50px auto;
+      background-color: #fff;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    #chat-window h1 {
+      background-color: #428bca;
+      color: #fff;
+      font-size: 24px;
+      font-weight: normal;
+      margin: 0;
+      padding: 10px;
+    }
+
+    #chat-window ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      max-height: 400px;
+      overflow-y: scroll;
+      padding-right: 10px;
+    }
+
+    #chat-window li {
+      margin: 10px;
+    }
+
+    #chat-window input {
+      width: 100%;
+      border: none;
+      padding: 10px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="chat-window">
+    <h1>Chatbot Example</h1>
+    <ul id="chat-log"></ul>
+    <input id="chat-input" type="text" placeholder="Type your message and press Enter">
+  </div>
+
+  <script>
+    // Initialize the WebSocket connection
+    const socket = new WebSocket("ws://localhost:8080");
+
+    // Handle incoming messages from the server
+    socket.addEventListener("message", event => {
+      const message = JSON.parse(event.data);
+      console.log(message)
+
+      const chatLog = document.querySelector("#chat-log");
+      const li = document.createElement("li");
+      chatLog.appendChild(li);
+
+      let i = 0;
+      const intervalId = setInterval(() => {
+        if (i < message.message.length) {
+          li.innerHTML += message.message.charAt(i);
+          i++;
+        } else {
+          clearInterval(intervalId);
+        }
+      }, 50);
+    });
+
+    // Send messages to the server when the user presses Enter
+    const input = document.querySelector("#chat-input");
+    input.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        const message = input.value;
+        input.value = "";
+
+        // Send the message to the server
+        socket.send(message);
+
+        // Add the message to the chat log
+        const chatLog = document.querySelector("#chat-log");
+        const li = document.createElement("li");
+        li.classList.add("sent");
+        li.textContent = message;
+        chatLog.appendChild(li);
+      }
+    });
+  </script>
+</body>
+
+</html>
